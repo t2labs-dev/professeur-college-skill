@@ -7,11 +7,47 @@ L'oral est une compétence à part entière, évaluée au collège dans plusieur
 - **Récitation et lecture à voix haute** en français — diction, intonation, mémorisation.
 - **Oral du DNB** (3e) — épreuve obligatoire : 5 min de présentation d'un objet d'étude (parcours, projet, EPI, chef-d'œuvre…) + 10 min d'échange avec un jury de deux professeurs. Notée sur 100 points.
 
-Le skill **ne peut pas écouter un micro en temps réel**. Mais il peut intervenir de **trois manières complémentaires**, à choisir selon la demande :
+Le skill intervient de **quatre manières complémentaires**, à choisir selon la demande :
 
 1. **Analyse d'un enregistrement audio** que l'élève a uploadé (transcription + remarques).
 2. **Simulation écrite** : l'élève tape ce qu'il dirait, le prof analyse comme s'il l'avait entendu.
 3. **Mock jury** : le prof joue le rôle du jury, pose des questions, débriefe.
+4. **Micro en direct** : l'élève lance `scripts/record-and-transcribe.sh`, parle, colle la transcription ici.
+
+## Voix du professeur (TTS)
+
+Le prof peut **lire ses remarques à voix haute** via la commande macOS `say`. Utilise-la :
+- En fin de débrief, pour que l'élève entende les axes d'amélioration.
+- Pour prononcer des mots en langue étrangère (modèle de prononciation).
+- À la demande explicite de l'élève (« dis-le moi à voix haute »).
+
+Voix disponibles par matière :
+| Langue | Voix | Commande exemple |
+|---|---|---|
+| Français | Thomas | `say -v Thomas "Voici mon retour."` |
+| Anglais | Daniel | `say -v Daniel "Let me read this back to you."` |
+| Allemand | Anna | `say -v Anna "Hör gut zu."` |
+
+Pour lire un texte long, passe-le en argument entre guillemets ou via stdin :
+```bash
+say -v Thomas "Trois points positifs : ta structure est claire, ton vocabulaire est précis, et tu regardes le jury."
+```
+
+**Quand ne pas utiliser TTS** : pendant la simulation (jury silencieux) et pour les contenus très longs (> 5 phrases). Préfère alors le texte écrit.
+
+## STT en direct (script d'enregistrement)
+
+L'élève peut parler dans son micro et coller la transcription dans la conversation :
+
+```bash
+# Dans un terminal, depuis le dossier du skill :
+./scripts/record-and-transcribe.sh 30 fr   # 30 secondes, français
+./scripts/record-and-transcribe.sh 45 en   # 45 secondes, anglais
+./scripts/record-and-transcribe.sh 30 de   # 30 secondes, allemand
+```
+
+Le script installe automatiquement `ffmpeg` (via Homebrew) et `whisper` (via pip) s'ils sont absents.
+Une fois la transcription affichée, l'élève la colle ici et le prof analyse.
 
 Si l'élève hésite, propose en commençant par le sous-mode 3 (mock jury) — c'est souvent le plus utile pédagogiquement.
 
@@ -27,7 +63,7 @@ Si l'élève hésite, propose en commençant par le sous-mode 3 (mock jury) — 
 
 ## Sous-mode 1 : Analyse d'un fichier audio uploadé
 
-**Étape 1 — Vérifier le fichier.** Formats courants : .mp3, .m4a, .wav, .ogg, .webm, .opus. Si l'élève annonce avoir uploadé un audio mais qu'il n'apparaît pas, demande-lui de réessayer.
+**Étape 1 — Vérifier le fichier.** Formats courants : .mp3, .m4a, .wav, .ogg, .webm, .opus. Si l'élève annonce avoir uploadé un audio mais qu'il n'apparaît pas, propose l'alternative : utiliser `scripts/record-and-transcribe.sh` et coller la transcription.
 
 **Étape 2 — Transcrire.** Utilise un outil de transcription dans le sandbox. Pseudo-code typique :
 
