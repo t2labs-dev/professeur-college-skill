@@ -47,15 +47,31 @@ J'ai mon oral du brevet dans 10 jours, fais-moi une simulation
 
 ### Voix du professeur (TTS)
 
-Sur macOS, le professeur peut lire certains retours à voix haute via la commande `say` intégrée au système. Les voix utilisées sont :
+Sur macOS, **chaque matière a sa propre voix** pour incarner un prof différent. Le helper `scripts/say-prof.sh` choisit la bonne voix et le bon débit selon la matière, et règle aussi la prosodie (ralenti pour insister, accéléré pour un récap, très lent pour modéliser une prononciation).
 
-| Langue | Voix |
-|---|---|
-| Français | Thomas |
-| Anglais | Daniel |
-| Allemand | Anna |
+| Matière | Persona | Voix utilisée (avec premium) | Fallback (sans premium) |
+|---|---|---|---|
+| Français | Mme Audrey | Audrey (Premium) | Thomas |
+| Mathématiques | M. Jacques | Thomas (Premium) ou Jacques | Thomas |
+| Histoire-Géographie | Mme Aurélie | Aurélie | Thomas |
+| SVT | Mme Marie | Marie | Thomas |
+| Physique-Chimie | M. Thomas | Thomas (Premium) | Thomas |
+| Anglais | Mr. Daniel | Ava (Premium) ou Evan (Premium) | Daniel |
+| Allemand | Frau Anna | Anna (Premium) | Anna |
+| Technologie | M. Thomas | Thomas (Premium) | Thomas |
 
-Ces voix sont pré-installées sur macOS — aucune dépendance supplémentaire.
+#### Installer les voix premium (recommandé)
+
+Les voix par défaut macOS (Thomas, Daniel, Anna) restent un peu robotiques. Les voix **Premium / Neural** sont nettement plus naturelles et expressives — elles font une vraie différence pour la perception "prof humain".
+
+1. **Réglages système** > **Accessibilité** > **Contenu énoncé**
+2. Cliquer sur **Voix système** > menu **Voix**
+3. Sélectionner **Personnaliser…** en bas de la liste
+4. Cocher les voix souhaitées (chercher « Premium » ou « Neural ») :
+   - Français : `Audrey (Premium)`, `Aurélie`, `Marie`, `Thomas (Premium)`
+   - Anglais : `Ava (Premium)`, `Evan (Premium)`, `Tom (Premium)`
+   - Allemand : `Anna (Premium)`, `Markus`, `Petra`
+5. macOS télécharge en arrière-plan (~100-500 Mo par voix). Une fois installées, le helper les détecte automatiquement.
 
 > **Sur Linux et Windows**, cette fonctionnalité n'est pas disponible. Le skill reste en mode texte.
 

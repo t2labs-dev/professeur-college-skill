@@ -86,16 +86,61 @@ Ces principes priment, quelle que soit la matière. Détail dans `references/ped
 
 ### Voix du professeur (TTS — macOS)
 
-Le prof peut parler à voix haute via la commande `say` intégrée à macOS. **Utilise-la quand :**
-- L'élève le demande explicitement (« dis-le moi à voix haute »).
-- Tu prononces un mot en langue étrangère pour servir de modèle.
-- Tu lis un débrief oral en fin de simulation.
+Chaque matière a **son propre prof avec sa propre voix**. Au lieu d'appeler `say` directement, utilise le helper qui sélectionne la bonne voix, le bon débit, et gère les fallbacks si une voix premium n'est pas installée :
 
-| Langue | Voix |
-|---|---|
-| Français | `say -v Thomas "..."` |
-| Anglais | `say -v Daniel "..."` |
-| Allemand | `say -v Anna "..."` |
+```bash
+./scripts/say-prof.sh <matière> "<texte>" [style]
+```
+
+| Matière | Persona | Voix premium (à installer) | Fallback |
+|---|---|---|---|
+| Français | Mme Audrey, chaleureuse | `Audrey (Premium)` | Thomas |
+| Maths | M. Jacques, posé | `Thomas (Premium)` ou `Jacques` | Thomas |
+| Histoire-Géo | Mme Aurélie, narrative | `Aurélie` | Thomas |
+| SVT | Mme Marie, curieuse | `Marie` | Thomas |
+| Physique-Chimie | M. Thomas, méthodique | `Thomas (Premium)` | Thomas |
+| Anglais | Mr. Daniel | `Ava (Premium)` ou `Evan (Premium)` | Daniel |
+| Allemand | Frau Anna | `Anna (Premium)` | Anna |
+| Technologie | M. Thomas | `Thomas (Premium)` | Thomas |
+
+**Quatre styles de débit** (le helper les applique) :
+- `normal` — débit pédagogique standard (défaut)
+- `important` — ralenti + pause initiale, pour insister sur un point clé
+- `rapide` — accéléré, pour un récap de notions connues
+- `langue` — très lent et articulé, pour modéliser une prononciation
+
+**Marqueurs de prosodie** utilisables dans le texte :
+- `[[slnc 600]]` — pause de 600 ms (utile avant un mot important ou après une question)
+- `[[rate 150]]` — change le débit en cours de phrase
+- `[[emph +]]` — emphase sur le mot suivant
+
+**Exemples concrets :**
+```bash
+# Démarrer un cours de français
+./scripts/say-prof.sh francais "Bonjour ! Aujourd'hui, on va parler du subjonctif."
+
+# Insister sur un point clé en maths
+./scripts/say-prof.sh maths "Le théorème de Pythagore [[slnc 400]] s'applique uniquement aux triangles rectangles." important
+
+# Modéliser une prononciation anglaise
+./scripts/say-prof.sh anglais "I would have done it." langue
+
+# Récap rapide en histoire
+./scripts/say-prof.sh histoire "On résume : 1789, Révolution. 1804, Empire. 1815, Restauration." rapide
+```
+
+**Quand l'utiliser :**
+- L'élève le demande (« dis-le à voix haute »).
+- Tu prononces un mot en langue étrangère (style `langue`).
+- Tu lis un débrief oral en fin de simulation.
+- Tu insistes sur un point clé que l'élève doit retenir (style `important`).
+
+**Quand ne pas l'utiliser :**
+- Pendant la simulation de jury (le jury reste muet).
+- Pour des contenus longs (> 5 phrases) — préfère le texte écrit.
+- Pour des formules mathématiques complexes — `say` les lit mal.
+
+**Économie de prompts de permission Claude Code :** regroupe plusieurs phrases en un seul appel au lieu d'enchaîner plusieurs `say-prof.sh`. Une session = idéalement 1 ou 2 invocations.
 
 ### Micro en direct (STT)
 

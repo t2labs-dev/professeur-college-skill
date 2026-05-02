@@ -16,24 +16,39 @@ Le skill intervient de **quatre manières complémentaires**, à choisir selon l
 
 ## Voix du professeur (TTS)
 
-Le prof peut **lire ses remarques à voix haute** via la commande macOS `say`. Utilise-la :
-- En fin de débrief, pour que l'élève entende les axes d'amélioration.
-- Pour prononcer des mots en langue étrangère (modèle de prononciation).
-- À la demande explicite de l'élève (« dis-le moi à voix haute »).
+Utilise le helper `scripts/say-prof.sh` (voir SKILL.md pour le mapping complet matière → voix). Il sélectionne la voix, le débit, et applique les marqueurs de prosodie.
 
-Voix disponibles par matière :
-| Langue | Voix | Commande exemple |
-|---|---|---|
-| Français | Thomas | `say -v Thomas "Voici mon retour."` |
-| Anglais | Daniel | `say -v Daniel "Let me read this back to you."` |
-| Allemand | Anna | `say -v Anna "Hör gut zu."` |
-
-Pour lire un texte long, passe-le en argument entre guillemets ou via stdin :
 ```bash
-say -v Thomas "Trois points positifs : ta structure est claire, ton vocabulaire est précis, et tu regardes le jury."
+./scripts/say-prof.sh <matière> "<texte>" [normal|important|rapide|langue]
 ```
 
-**Quand ne pas utiliser TTS** : pendant la simulation (jury silencieux) et pour les contenus très longs (> 5 phrases). Préfère alors le texte écrit.
+**Trois usages clés en mode oral :**
+
+**1. Modéliser une prononciation (langues vivantes)** — utilise le style `langue` (très lent et articulé) :
+```bash
+./scripts/say-prof.sh anglais "I would have gone if I had known." langue
+./scripts/say-prof.sh allemand "Ich hätte es gewusst." langue
+```
+
+**2. Lire le débrief en fin de simulation** — utilise `normal`, en regroupant en une seule invocation :
+```bash
+./scripts/say-prof.sh francais "Trois points positifs. [[slnc 400]] Ta structure est claire. [[slnc 300]] Ton vocabulaire est précis. [[slnc 300]] Tu regardes le jury."
+```
+
+**3. Insister sur un axe d'amélioration prioritaire** — style `important` :
+```bash
+./scripts/say-prof.sh francais "Attention à ne pas lire tes notes en boucle. [[slnc 400]] Lève les yeux." important
+```
+
+**Marqueurs de prosodie utiles à l'oral :**
+- `[[slnc 400]]` — pause naturelle entre deux idées (équivalent virgule longue ou point)
+- `[[slnc 800]]` — pause appuyée, juste avant ou après un mot clé
+- `[[emph +]]` — emphase sur le mot suivant (ex : `[[emph +]] toujours`)
+
+**Quand ne pas utiliser TTS** :
+- Pendant la simulation de jury en cours (le jury reste silencieux jusqu'au débrief).
+- Pour les contenus très longs (> 5 phrases) — préfère le texte écrit.
+- Quand l'élève est en mode "récitation par cœur" (ne pas lui donner le texte à voix haute, ça le déconcentre).
 
 ## STT en direct (script d'enregistrement)
 
