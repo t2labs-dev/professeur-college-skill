@@ -16,39 +16,39 @@ Le skill intervient de **quatre manières complémentaires**, à choisir selon l
 
 ## Voix du professeur (TTS)
 
-Utilise le helper `scripts/say-prof.sh` (voir SKILL.md pour le mapping complet matière → voix). Il sélectionne la voix, le débit, et applique les marqueurs de prosodie.
+Utilise toujours l'orchestrateur `scripts/voix-prof.sh` (voir SKILL.md pour la doc complète : il choisit OpenAI, `say`, ou texte selon ce qui est disponible).
 
 ```bash
-./scripts/say-prof.sh <matière> "<texte>" [normal|important|rapide|langue]
+./scripts/voix-prof.sh <matière> "<texte>" [normal|important|rapide|langue]
 ```
 
-**Trois usages clés en mode oral :**
+**Rappel : la voix s'utilise uniquement dans 3 cas** (capter l'attention, dicter en français, modéliser une prononciation LV). Pour le mode oral, c'est le 3e cas qui est le plus fréquent.
 
-**1. Modéliser une prononciation (langues vivantes)** — utilise le style `langue` (très lent et articulé) :
+**1. Modéliser une prononciation (LV anglais/allemand)** — style `langue` obligatoire :
 ```bash
-./scripts/say-prof.sh anglais "I would have gone if I had known." langue
-./scripts/say-prof.sh allemand "Ich hätte es gewusst." langue
+./scripts/voix-prof.sh anglais "I would have gone if I had known." langue
+./scripts/voix-prof.sh allemand "Ich hätte es gewusst." langue
 ```
 
-**2. Lire le débrief en fin de simulation** — utilise `normal`, en regroupant en une seule invocation :
+**2. Capter l'attention sur un point clé du débrief** — style `important`, **une seule phrase courte** :
 ```bash
-./scripts/say-prof.sh francais "Trois points positifs. [[slnc 400]] Ta structure est claire. [[slnc 300]] Ton vocabulaire est précis. [[slnc 300]] Tu regardes le jury."
+./scripts/voix-prof.sh francais "Attention : ne lis pas tes notes en boucle, lève les yeux." important
 ```
 
-**3. Insister sur un axe d'amélioration prioritaire** — style `important` :
+**3. Dicter le texte d'une récitation à corriger** (français) :
 ```bash
-./scripts/say-prof.sh francais "Attention à ne pas lire tes notes en boucle. [[slnc 400]] Lève les yeux." important
+./scripts/voix-prof.sh francais "Demain dès l'aube, à l'heure où blanchit la campagne..." langue
 ```
 
-**Marqueurs de prosodie utiles à l'oral :**
-- `[[slnc 400]]` — pause naturelle entre deux idées (équivalent virgule longue ou point)
-- `[[slnc 800]]` — pause appuyée, juste avant ou après un mot clé
-- `[[emph +]]` — emphase sur le mot suivant (ex : `[[emph +]] toujours`)
+**Marqueurs de prosodie utiles** (backend `say` ; nettoyés automatiquement par OpenAI) :
+- `[[slnc 400]]` — pause naturelle entre deux idées
+- `[[slnc 800]]` — pause appuyée, avant/après un mot clé
+- `[[emph +]]` — emphase sur le mot suivant
 
-**Quand ne pas utiliser TTS** :
+**Quand ne pas utiliser la voix en mode oral :**
 - Pendant la simulation de jury en cours (le jury reste silencieux jusqu'au débrief).
-- Pour les contenus très longs (> 5 phrases) — préfère le texte écrit.
-- Quand l'élève est en mode "récitation par cœur" (ne pas lui donner le texte à voix haute, ça le déconcentre).
+- Pour le débrief complet (3 points + axes + exercices) — c'est trop long, préfère l'écrit.
+- Quand l'élève est en mode "récitation par cœur" et doit retrouver le texte sans aide.
 
 ## STT en direct (script d'enregistrement)
 

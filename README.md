@@ -47,33 +47,75 @@ J'ai mon oral du brevet dans 10 jours, fais-moi une simulation
 
 ### Voix du professeur (TTS)
 
-Sur macOS, **chaque matière a sa propre voix** pour incarner un prof différent. Le helper `scripts/say-prof.sh` choisit la bonne voix et le bon débit selon la matière, et règle aussi la prosodie (ralenti pour insister, accéléré pour un récap, très lent pour modéliser une prononciation).
+Chaque matière a **son propre prof avec sa propre voix**. L'orchestrateur `scripts/voix-prof.sh` sélectionne automatiquement le meilleur backend disponible :
 
-| Matière | Persona | Voix utilisée (avec premium) | Fallback (sans premium) |
+| Backend | Quand | Qualité | Coût |
 |---|---|---|---|
-| Français | Mme Audrey | Audrey (Premium) | Thomas |
-| Mathématiques | M. Jacques | Thomas (Premium) ou Jacques | Thomas |
-| Histoire-Géographie | Mme Aurélie | Aurélie | Thomas |
-| SVT | Mme Marie | Marie | Thomas |
-| Physique-Chimie | M. Thomas | Thomas (Premium) | Thomas |
-| Anglais | Mr. Daniel | Ava (Premium) ou Evan (Premium) | Daniel |
-| Allemand | Frau Anna | Anna (Premium) | Anna |
-| Technologie | M. Thomas | Thomas (Premium) | Thomas |
+| **OpenAI TTS** | Si `OPENAI_API_KEY` est configurée | ⭐⭐⭐ Quasi-humaine | ~$0.03/1k caractères |
+| **macOS `say`** | Sur Mac sans clé OpenAI | ⭐⭐ Correcte (⭐⭐⭐ avec voix premium) | Gratuit |
+| **Texte écrit** | Linux/Windows sans clé | — | Gratuit |
 
-#### Installer les voix premium (recommandé)
+#### Quand le prof utilise sa voix — 3 cas seulement
 
-Les voix par défaut macOS (Thomas, Daniel, Anna) restent un peu robotiques. Les voix **Premium / Neural** sont nettement plus naturelles et expressives — elles font une vraie différence pour la perception "prof humain".
+La voix n'est pas activée en permanence. Le skill l'utilise uniquement pour :
+1. **Capter l'attention** de l'élève (courte phrase d'accroche).
+2. **Dicter un texte en français** (orthographe, récitation, mémorisation).
+3. **Montrer la bonne prononciation** en langue étrangère (anglais, allemand).
+
+Pour tout le reste (explications, corrections, fiches), le skill reste en texte écrit.
+
+#### Mapping matière → persona
+
+| Matière | Persona | Voix OpenAI | Voix macOS (avec premium) |
+|---|---|---|---|
+| Français | Mme Audrey | `nova` | Audrey (Premium) |
+| Mathématiques | M. Jacques | `onyx` | Thomas (Premium) ou Jacques |
+| Histoire-Géographie | Mme Aurélie | `shimmer` | Aurélie |
+| SVT | Mme Marie | `coral` | Marie |
+| Physique-Chimie | M. Thomas | `echo` | Thomas (Premium) |
+| Anglais | Mr. Daniel | `fable` | Ava (Premium) ou Evan (Premium) |
+| Allemand | Frau Anna | `sage` | Anna (Premium) |
+| Technologie | M. Thomas | `alloy` | Thomas (Premium) |
+
+#### Configuration OpenAI (recommandé pour la qualité)
+
+Pour activer le backend OpenAI, fournis une clé API par **l'une** de ces 3 méthodes (priorité décroissante) :
+
+**1. Variable d'environnement** (la plus simple)
+```bash
+export OPENAI_API_KEY="sk-..."
+```
+Ajoute la ligne à ton `~/.zshrc` ou `~/.bashrc` pour la rendre permanente.
+
+**2. Fichier utilisateur**
+```bash
+mkdir -p ~/.config/professeur-college
+echo "sk-..." > ~/.config/professeur-college/openai-key
+chmod 600 ~/.config/professeur-college/openai-key
+```
+
+**3. Fichier dans le skill** (gitignored)
+```bash
+echo "sk-..." > <dossier-du-skill>/.openai-key
+```
+
+Une fois la clé en place, le skill l'utilise automatiquement à la prochaine invocation. Aucun autre paramétrage requis.
+
+> Coût indicatif : une session de 30 min utilise rarement plus de 5-10 phrases de voix (les 3 règles ci-dessus limitent l'usage). Compte **moins de 1 centime par session**.
+
+#### Installer les voix premium macOS (alternative gratuite)
+
+Si tu préfères ne pas utiliser OpenAI, les voix **Premium / Neural** macOS améliorent nettement le rendu de `say` (la voix par défaut Thomas reste un peu robotique).
 
 1. **Réglages système** > **Accessibilité** > **Contenu énoncé**
-2. Cliquer sur **Voix système** > menu **Voix**
-3. Sélectionner **Personnaliser…** en bas de la liste
-4. Cocher les voix souhaitées (chercher « Premium » ou « Neural ») :
+2. Cliquer sur **Voix système** > menu **Voix** > **Personnaliser…**
+3. Cocher les voix souhaitées :
    - Français : `Audrey (Premium)`, `Aurélie`, `Marie`, `Thomas (Premium)`
    - Anglais : `Ava (Premium)`, `Evan (Premium)`, `Tom (Premium)`
    - Allemand : `Anna (Premium)`, `Markus`, `Petra`
-5. macOS télécharge en arrière-plan (~100-500 Mo par voix). Une fois installées, le helper les détecte automatiquement.
+4. macOS télécharge en arrière-plan (~100-500 Mo par voix). Le helper détecte automatiquement les voix installées.
 
-> **Sur Linux et Windows**, cette fonctionnalité n'est pas disponible. Le skill reste en mode texte.
+> **Sur Linux et Windows sans clé OpenAI**, le skill bascule en mode texte uniquement.
 
 ### Micro en direct (STT)
 

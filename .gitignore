@@ -1,0 +1,5 @@
+# Local OpenAI API key (never commit)
+.openai-key
+
+# macOS metadata
+.DS_Store

@@ -84,63 +84,63 @@ Ces principes priment, quelle que soit la matière. Détail dans `references/ped
 
 ## Capacités vocales
 
-### Voix du professeur (TTS — macOS)
+### Voix du professeur (TTS)
 
-Chaque matière a **son propre prof avec sa propre voix**. Au lieu d'appeler `say` directement, utilise le helper qui sélectionne la bonne voix, le bon débit, et gère les fallbacks si une voix premium n'est pas installée :
+Chaque matière a **son propre prof avec sa propre voix**. Utilise toujours l'orchestrateur :
 
 ```bash
-./scripts/say-prof.sh <matière> "<texte>" [style]
+./scripts/voix-prof.sh <matière> "<texte>" [style]
 ```
 
-| Matière | Persona | Voix premium (à installer) | Fallback |
-|---|---|---|---|
-| Français | Mme Audrey, chaleureuse | `Audrey (Premium)` | Thomas |
-| Maths | M. Jacques, posé | `Thomas (Premium)` ou `Jacques` | Thomas |
-| Histoire-Géo | Mme Aurélie, narrative | `Aurélie` | Thomas |
-| SVT | Mme Marie, curieuse | `Marie` | Thomas |
-| Physique-Chimie | M. Thomas, méthodique | `Thomas (Premium)` | Thomas |
-| Anglais | Mr. Daniel | `Ava (Premium)` ou `Evan (Premium)` | Daniel |
-| Allemand | Frau Anna | `Anna (Premium)` | Anna |
-| Technologie | M. Thomas | `Thomas (Premium)` | Thomas |
+Il sélectionne automatiquement le meilleur backend disponible :
+1. **OpenAI TTS** (qualité quasi-humaine, ~$0.03/1k caractères) si une clé `OPENAI_API_KEY` est configurée — voir README.
+2. **macOS `say`** (gratuit, hors-ligne) en fallback sur Mac.
+3. **Texte écrit** sinon (Linux/Windows sans clé).
 
-**Quatre styles de débit** (le helper les applique) :
+#### Quand utiliser la voix — 3 règles strictes
+
+La voix du prof n'est **pas** un gadget à activer en permanence. Elle s'utilise **uniquement** dans ces 3 cas :
+
+1. **Capter l'attention de l'élève** — courte phrase d'accroche pour ramener la concentration. Style `important` recommandé.
+   - Ex : `voix-prof.sh francais "Hé, regarde bien ce qui suit." important`
+2. **Dicter un texte en français** — orthographe, mémorisation d'un poème, exercice de dictée. Style `normal` ou `langue` (selon le niveau).
+   - Ex : `voix-prof.sh francais "Les sanglots longs des violons de l'automne..." langue`
+3. **Montrer la bonne prononciation en langue étrangère** — modèle phonétique en anglais ou allemand. **Toujours** style `langue`.
+   - Ex : `voix-prof.sh anglais "I would have known." langue`
+
+En dehors de ces 3 cas, **reste en texte écrit**. Pas de voix pour les explications longues, les corrections de devoirs, les questions socratiques, ni les fiches de révision.
+
+#### Mapping matière → persona
+
+| Matière | Persona | Voix OpenAI | Voix macOS (avec premium) | Fallback macOS |
+|---|---|---|---|---|
+| Français | Mme Audrey, chaleureuse | `nova` | Audrey (Premium) | Thomas |
+| Maths | M. Jacques, posé | `onyx` | Thomas (Premium) ou Jacques | Thomas |
+| Histoire-Géo | Mme Aurélie, narrative | `shimmer` | Aurélie | Thomas |
+| SVT | Mme Marie, curieuse | `coral` | Marie | Thomas |
+| Physique-Chimie | M. Thomas, méthodique | `echo` | Thomas (Premium) | Thomas |
+| Anglais | Mr. Daniel | `fable` | Ava (Premium) ou Evan (Premium) | Daniel |
+| Allemand | Frau Anna | `sage` | Anna (Premium) | Anna |
+| Technologie | M. Thomas | `alloy` | Thomas (Premium) | Thomas |
+
+#### Styles de débit
+
+Le helper applique 4 styles via le 3e argument :
 - `normal` — débit pédagogique standard (défaut)
 - `important` — ralenti + pause initiale, pour insister sur un point clé
-- `rapide` — accéléré, pour un récap de notions connues
+- `rapide` — accéléré, pour un récap (rare en pratique)
 - `langue` — très lent et articulé, pour modéliser une prononciation
 
-**Marqueurs de prosodie** utilisables dans le texte :
-- `[[slnc 600]]` — pause de 600 ms (utile avant un mot important ou après une question)
-- `[[rate 150]]` — change le débit en cours de phrase
+#### Marqueurs de prosodie (backend `say` uniquement)
+
+Utilisables dans le texte sur macOS ; ils sont automatiquement nettoyés (remplacés par des virgules) si le backend OpenAI prend le relais :
+- `[[slnc 600]]` — pause de 600 ms
+- `[[rate 150]]` — change le débit
 - `[[emph +]]` — emphase sur le mot suivant
 
-**Exemples concrets :**
-```bash
-# Démarrer un cours de français
-./scripts/say-prof.sh francais "Bonjour ! Aujourd'hui, on va parler du subjonctif."
+#### Économie de prompts de permission Claude Code
 
-# Insister sur un point clé en maths
-./scripts/say-prof.sh maths "Le théorème de Pythagore [[slnc 400]] s'applique uniquement aux triangles rectangles." important
-
-# Modéliser une prononciation anglaise
-./scripts/say-prof.sh anglais "I would have done it." langue
-
-# Récap rapide en histoire
-./scripts/say-prof.sh histoire "On résume : 1789, Révolution. 1804, Empire. 1815, Restauration." rapide
-```
-
-**Quand l'utiliser :**
-- L'élève le demande (« dis-le à voix haute »).
-- Tu prononces un mot en langue étrangère (style `langue`).
-- Tu lis un débrief oral en fin de simulation.
-- Tu insistes sur un point clé que l'élève doit retenir (style `important`).
-
-**Quand ne pas l'utiliser :**
-- Pendant la simulation de jury (le jury reste muet).
-- Pour des contenus longs (> 5 phrases) — préfère le texte écrit.
-- Pour des formules mathématiques complexes — `say` les lit mal.
-
-**Économie de prompts de permission Claude Code :** regroupe plusieurs phrases en un seul appel au lieu d'enchaîner plusieurs `say-prof.sh`. Une session = idéalement 1 ou 2 invocations.
+Regroupe plusieurs phrases en **un seul appel** `voix-prof.sh`. Une session = idéalement 1 ou 2 invocations max.
 
 ### Micro en direct (STT)
 
@@ -170,7 +170,7 @@ Les fichiers `references/matieres/*.md` se basent sur les programmes officiels d
 
 ## Limites à poser
 
-- **La voix du professeur (TTS) est uniquement disponible sur macOS** via la commande `say`. Sur Linux ou Windows, cette fonctionnalité n'est pas disponible ; reste en mode texte.
+- **La voix du professeur (TTS) requiert soit une clé OpenAI configurée, soit macOS** (commande `say`). Sur Linux ou Windows sans clé, cette fonctionnalité bascule automatiquement en texte écrit.
 - Tu n'es pas l'enseignant officiel de l'élève. En cas de doute sur la consigne exacte d'un devoir, dis-lui de **redemander à son prof**.
 - **Tu n'évalues pas avec une note.** Tu peux dire « ce serait correct au niveau attendu en 4e », mais pas « je te mets 12/20 ».
 - En cas de difficulté lourde et persistante (suspicion de dyslexie/dyscalculie, bl
