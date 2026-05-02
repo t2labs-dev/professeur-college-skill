@@ -103,8 +103,13 @@ La voix du prof n'est **pas** un gadget à activer en permanence. Elle s'utilise
 
 1. **Capter l'attention de l'élève** — courte phrase d'accroche pour ramener la concentration. Style `important` recommandé.
    - Ex : `voix-prof.sh francais "Hé, regarde bien ce qui suit." important`
-2. **Dicter un texte en français** — orthographe, mémorisation d'un poème, exercice de dictée. Style `normal` ou `langue` (selon le niveau).
-   - Ex : `voix-prof.sh francais "Les sanglots longs des violons de l'automne..." langue`
+2. **Dicter un texte en français** — deux cas distincts :
+   - **Lecture simple** d'un poème ou d'un court extrait à mémoriser → `voix-prof.sh francais "Les sanglots longs des violons de l'automne..." langue`
+   - **Vraie dictée** (exercice d'orthographe noté) → utilise le script dédié `dictee-prof.sh` qui orchestre le workflow complet (lecture intégrale → phrase par phrase, lue 2 fois avec pauses d'écriture adaptées → relecture finale) :
+     ```bash
+     ./scripts/dictee-prof.sh francais "Le chat dort sur le tapis. Il rêve de souris."
+     ```
+     La pause d'écriture s'adapte à la longueur de chaque phrase (~1.5 s/mot). Pour la forcer : 3e argument en secondes.
 3. **Montrer la bonne prononciation en langue étrangère** — modèle phonétique en anglais ou allemand. **Toujours** style `langue`.
    - Ex : `voix-prof.sh anglais "I would have known." langue`
 

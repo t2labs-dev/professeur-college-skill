@@ -59,7 +59,7 @@ Chaque matière a **son propre prof avec sa propre voix**. L'orchestrateur `scri
 
 La voix n'est pas activée en permanence. Le skill l'utilise uniquement pour :
 1. **Capter l'attention** de l'élève (courte phrase d'accroche).
-2. **Dicter un texte en français** (orthographe, récitation, mémorisation).
+2. **Dicter un texte en français** (orthographe, récitation, mémorisation). Pour une vraie dictée notée, le skill utilise `scripts/dictee-prof.sh` qui structure la lecture (intégrale → phrase par phrase lue 2 fois avec pauses d'écriture → relecture finale).
 3. **Montrer la bonne prononciation** en langue étrangère (anglais, allemand).
 
 Pour tout le reste (explications, corrections, fiches), le skill reste en texte écrit.
