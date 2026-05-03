@@ -86,6 +86,8 @@ Ces principes priment, quelle que soit la matière. Détail dans `references/ped
 
 ### Voix du professeur (TTS)
 
+> **⚠ Pré-requis pour la voix de qualité quasi-humaine : une clé API OpenAI** doit être configurée par l'utilisateur (voir README, section "Configuration OpenAI"). Sans clé, le skill bascule sur la voix macOS `say` (qualité correcte mais robotique) ou, hors macOS, en texte écrit.
+
 Chaque matière a **son propre prof avec sa propre voix**. Utilise toujours l'orchestrateur :
 
 ```bash
@@ -93,9 +95,22 @@ Chaque matière a **son propre prof avec sa propre voix**. Utilise toujours l'or
 ```
 
 Il sélectionne automatiquement le meilleur backend disponible :
-1. **OpenAI TTS** (qualité quasi-humaine, ~$0.03/1k caractères) si une clé `OPENAI_API_KEY` est configurée — voir README.
-2. **macOS `say`** (gratuit, hors-ligne) en fallback sur Mac.
-3. **Texte écrit** sinon (Linux/Windows sans clé).
+
+| Backend | Pré-requis | Qualité |
+|---|---|---|
+| **OpenAI TTS** | Clé `OPENAI_API_KEY` configurée (~$0.03/1k caractères) | ⭐⭐⭐ quasi-humaine |
+| **macOS `say`** | Sur Mac, fallback automatique | ⭐⭐ correcte (⭐⭐⭐ avec voix premium) |
+| **Texte écrit** | Linux/Windows sans clé | — |
+
+**Comportement attendu du prof (Claude) avant le premier usage vocal d'une session :**
+
+Avant d'utiliser la voix pour la première fois (cas 1, 2 ou 3 ci-dessous), vérifie l'état du backend en une commande silencieuse, par exemple :
+```bash
+[ -n "$OPENAI_API_KEY" ] || [ -f "$HOME/.config/professeur-college/openai-key" ] && echo "openai" || echo "fallback"
+```
+- Si **OpenAI dispo** : utilise sans rien dire à l'utilisateur (c'est le cas optimal).
+- Si **fallback `say` sur Mac** : à la première occurrence vocale, mentionne brièvement (1 phrase) que tu utilises la voix macOS et que pour une voix plus naturelle l'utilisateur peut configurer `OPENAI_API_KEY` (renvoie au README). Ne le répète pas dans la session.
+- Si **aucun TTS dispo (Linux/Windows sans clé)** : à la première occurrence vocale, préviens que la voix bascule en texte écrit et explique brièvement la procédure de configuration. Ne le répète pas.
 
 #### Quand utiliser la voix — 3 règles strictes
 
