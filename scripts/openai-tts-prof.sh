@@ -99,6 +99,13 @@ if [ "$HTTP_CODE" != "200" ]; then
   exit 3
 fi
 
+# ── Mode "génération seule" : si OUTPUT_FILE est défini, on déplace et on sort ──
+if [ -n "${OUTPUT_FILE:-}" ]; then
+  mv "$TMPFILE" "$OUTPUT_FILE"
+  trap '' EXIT
+  exit 0
+fi
+
 # ── Lecture audio ─────────────────────────────────────────────────────────────
 if command -v afplay &>/dev/null; then
   afplay "$TMPFILE"

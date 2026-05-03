@@ -120,11 +120,16 @@ La voix du prof n'est **pas** un gadget à activer en permanence. Elle s'utilise
    - Ex : `voix-prof.sh francais "Hé, regarde bien ce qui suit." important`
 2. **Dicter un texte en français** — deux cas distincts :
    - **Lecture simple** d'un poème ou d'un court extrait à mémoriser → `voix-prof.sh francais "Les sanglots longs des violons de l'automne..." langue`
-   - **Vraie dictée** (exercice d'orthographe noté) → utilise le script dédié `dictee-prof.sh` qui orchestre le workflow complet (lecture intégrale → phrase par phrase, lue 2 fois avec pauses d'écriture adaptées → relecture finale) :
+   - **Vraie dictée** (exercice d'orthographe noté) → utilise le script dédié `dictee-prof.sh` qui reproduit le workflow officiel du brevet :
+     1. **Phase 1** : lecture intégrale au tempo normal (contextualisation, sans pause).
+     2. **Phase 2** : pour chaque phrase, dictée par **groupes de souffle** (~5-10 mots, ponctuation parlée à la fin : « virgule », « point »). Chaque chunk est lu **deux fois** avec une pause d'écriture entre les deux (~1.2 s/mot, 4-12 s). Après tous les chunks d'une phrase, **récap** de la phrase entière en lecture continue.
+     3. **Phase 3** : relecture finale en chunks continus (avec ponctuation parlée).
      ```bash
      ./scripts/dictee-prof.sh francais "Le chat dort sur le tapis. Il rêve de souris."
      ```
-     La pause d'écriture s'adapte à la longueur de chaque phrase (~1.5 s/mot). Pour la forcer : 3e argument en secondes.
+     Pour forcer une pause d'écriture fixe : 3e argument en secondes.
+
+     Voix continue : un seul appel par phase côté `say` (avec `[[slnc N]]`), audio concaténé via `ffmpeg` côté OpenAI (un MP3 par chunk unique + un par récap, silences réels insérés). Pas de re-génération de chunk.
 3. **Montrer la bonne prononciation en langue étrangère** — modèle phonétique en anglais ou allemand. **Toujours** style `langue`.
    - Ex : `voix-prof.sh anglais "I would have known." langue`
 

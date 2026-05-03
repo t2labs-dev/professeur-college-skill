@@ -3,3 +3,6 @@
 
 # macOS metadata
 .DS_Store
+
+# Transcriptions audio (utilisées localement pour calibrer la dictée)
+*.srt
