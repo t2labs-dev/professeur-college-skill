@@ -54,7 +54,7 @@ pick_voice() {
 # ── Mapping matière → voix (premium d'abord, puis fallbacks) ──────────────────
 case "$MATIERE" in
   francais|français)
-    VOIX=$(pick_voice "Audrey (Premium)" "Aurélie" "Marie" "Audrey" "Thomas")
+    VOIX=$(pick_voice "Audrey (Premium)" "Audrey (Enhanced)" "Aurélie" "Marie" "Audrey" "Thomas")
     BASE_RATE=175
     PERSONA="Mme Audrey, prof de français — chaleureuse, expressive"
     ;;
@@ -64,12 +64,12 @@ case "$MATIERE" in
     PERSONA="M. Jacques, prof de maths — posé, rigoureux"
     ;;
   histoire|histoire-geographie|histoire-geographie|histoire-geo|hg)
-    VOIX=$(pick_voice "Aurélie" "Marie" "Audrey (Premium)" "Sandy (Français (France))" "Thomas")
+    VOIX=$(pick_voice "Aurélie" "Marie" "Audrey (Premium)" "Audrey (Enhanced)" "Sandy (Français (France))" "Thomas")
     BASE_RATE=175   # rythme conteur
     PERSONA="Mme Aurélie, prof d'histoire-géo — narrative, posée"
     ;;
   svt)
-    VOIX=$(pick_voice "Marie" "Audrey (Premium)" "Shelley (Français (France))" "Thomas")
+    VOIX=$(pick_voice "Marie" "Audrey (Premium)" "Audrey (Enhanced)" "Shelley (Français (France))" "Thomas")
     BASE_RATE=170
     PERSONA="Mme Marie, prof de SVT — curieuse, précise"
     ;;
@@ -84,7 +84,7 @@ case "$MATIERE" in
     PERSONA="Mr. Daniel, English teacher — clear, encouraging"
     ;;
   allemand|deutsch|lv2)
-    VOIX=$(pick_voice "Anna (Premium)" "Markus" "Petra" "Anna")
+    VOIX=$(pick_voice "Anna (Premium)" "Anna (Enhanced)" "Markus" "Petra" "Anna")
     BASE_RATE=150   # encore plus lent (LV2, phonétique)
     PERSONA="Frau Anna, Deutschlehrerin — deutlich, ruhig"
     ;;

@@ -37,7 +37,12 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── Détection backend ─────────────────────────────────────────────────────────
+# Override possible via PROF_BACKEND=say|openai|text
 detect_backend() {
+  if [ -n "${PROF_BACKEND:-}" ]; then
+    echo "$PROF_BACKEND"
+    return
+  fi
   if [ -n "${OPENAI_API_KEY:-}" ] || \
      [ -f "$HOME/.config/professeur-college/openai-key" ] || \
      [ -f "$SCRIPT_DIR/../.openai-key" ]; then

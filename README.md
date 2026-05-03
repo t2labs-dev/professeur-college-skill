@@ -129,6 +129,15 @@ Si tu préfères ne pas utiliser OpenAI, les voix **Premium / Neural** macOS am�
 
 > **Sur Linux et Windows sans clé OpenAI**, le skill bascule en mode texte uniquement.
 
+#### Forcer un backend (debug / test)
+
+Pour bypasser la détection automatique, exporte la variable d'env `PROF_BACKEND` avec `say`, `openai` ou `text` :
+
+```bash
+PROF_BACKEND=say ./scripts/voix-prof.sh francais "Test avec say."
+PROF_BACKEND=text ./scripts/dictee-prof.sh francais "Aperçu sans audio."
+```
+
 ### Micro en direct (STT)
 
 L'élève peut parler dans son micro et soumettre la transcription au professeur :

@@ -42,7 +42,14 @@ has_openai_key() {
 }
 
 # ── Sélection du backend ──────────────────────────────────────────────────────
-if has_openai_key; then
+# Override possible via PROF_BACKEND=say|openai|text
+if [ "${PROF_BACKEND:-}" = "say" ] && [[ "$OSTYPE" == "darwin"* ]] && command -v say &>/dev/null; then
+  exec "$SCRIPT_DIR/say-prof.sh" "$MATIERE" "$TEXTE" "$STYLE"
+elif [ "${PROF_BACKEND:-}" = "openai" ] && has_openai_key; then
+  exec "$SCRIPT_DIR/openai-tts-prof.sh" "$MATIERE" "$TEXTE" "$STYLE"
+elif [ "${PROF_BACKEND:-}" = "text" ]; then
+  : # tomber dans le fallback texte ci-dessous
+elif has_openai_key; then
   exec "$SCRIPT_DIR/openai-tts-prof.sh" "$MATIERE" "$TEXTE" "$STYLE"
 elif [[ "$OSTYPE" == "darwin"* ]] && command -v say &>/dev/null; then
   exec "$SCRIPT_DIR/say-prof.sh" "$MATIERE" "$TEXTE" "$STYLE"
