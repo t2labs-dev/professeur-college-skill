@@ -45,6 +45,18 @@ J'ai mon oral du brevet dans 10 jours, fais-moi une simulation
 
 ## Capacités vocales (macOS uniquement)
 
+### Pré-requis système
+
+Selon les fonctionnalités utilisées :
+
+| Fonctionnalité | Outil requis | Installation |
+|---|---|---|
+| Dictée avec backend OpenAI (`dictee-prof.sh`) | `ffmpeg` | `brew install ffmpeg` |
+| Enregistrement micro (`record-and-transcribe.sh`) | `ffmpeg` + `whisper` | `brew install ffmpeg` puis `pip3 install openai-whisper` |
+| Voix `say` (sans dictée OpenAI) | rien | déjà installé sur macOS |
+
+`ffmpeg` est nécessaire pour la dictée en backend OpenAI (concaténation des chunks audio avec silences réels) ainsi que pour l'enregistrement micro. Si Homebrew n'est pas installé : [brew.sh](https://brew.sh).
+
 ### Voix du professeur (TTS)
 
 Chaque matière a **son propre prof avec sa propre voix**. L'orchestrateur `scripts/voix-prof.sh` sélectionne automatiquement le meilleur backend disponible :
@@ -128,7 +140,11 @@ L'élève peut parler dans son micro et soumettre la transcription au professeur
 ./scripts/record-and-transcribe.sh 30 de   # 30 secondes, allemand
 ```
 
-Le script installe automatiquement `ffmpeg` (via Homebrew) et `whisper` (via pip) au premier lancement.
+Le script tente d'installer `ffmpeg` et `whisper` au premier lancement, mais l'installation manuelle est plus fiable :
+```bash
+brew install ffmpeg
+pip3 install openai-whisper
+```
 
 ### Permissions Claude Code
 
