@@ -15,7 +15,7 @@ Propose-le explicitement à l'élève dans ces situations :
 
 Claude Code demande la permission pour chaque commande nouvelle. Pour éviter d'interrompre la pratique 20 fois, **prévenir l'élève dès l'acceptation du mode** :
 
-> *« Claude Code va me demander 2 autorisations dès qu'on commence : une pour parler (`voix-prof.sh`), une pour t'enregistrer (`record-and-transcribe.sh`). Choisis "Always allow" sur chaque, après ça on enchaîne sans interruption. »*
+> *« Claude Code va me demander 2 ou 3 autorisations dès qu'on commence : pour parler (`voix-prof.sh`), pour t'enregistrer (`record-and-transcribe.sh`), et — si on travaille la prononciation fine — pour le diagnostic phonétique (`prononciation-prof.sh`). Choisis "Always allow" sur chaque, après ça on enchaîne sans interruption. »*
 
 Puis lance immédiatement, dans cet ordre, **un seul appel chacun** :
 1. Phrase d'accroche TTS (déclenche permission `voix-prof.sh` / `say` / `afplay`) :
@@ -26,8 +26,12 @@ Puis lance immédiatement, dans cet ordre, **un seul appel chacun** :
    ```bash
    ./scripts/record-and-transcribe.sh 5 en
    ```
+3. **Si diagnostic phonétique attendu** dans la session, lance aussi un appel court à `prononciation-prof.sh` sur un mot simple pour déclencher la 3e permission :
+   ```bash
+   ./scripts/prononciation-prof.sh "hello" en 3
+   ```
 
-Une fois les deux « Always allow » donnés, la pratique tourne sans prompt.
+Une fois les « Always allow » donnés, la pratique tourne sans prompt.
 
 ## 4 sous-modes
 
@@ -101,10 +105,33 @@ Format de feedback **court** (3-5 lignes max), pour ne pas casser le rythme :
 |---|---|---|
 | **Grammaire** | Erreur de temps, ordre des mots, accord, auxiliaire manquant | Donner la règle en 1 phrase + reformulation correcte |
 | **Vocabulaire** | Faux-ami, mot français traduit littéralement, registre | Mot juste + 1 exemple |
-| **Prononciation** | Phonèmes critiques EN : `th` /θ/ /ð/, voyelles longues, -ed /t/ /d/ /ɪd/, accent tonique. Phonèmes critiques DE : `r`, `ch` (ich-Laut/ach-Laut), umlauts, déclinaison à l'oreille | Re-modèle le mot via TTS (`voix-prof.sh ... langue`) + transcription simplifiée |
+| **Prononciation** | Phonèmes critiques EN : `th` /θ/ /ð/, voyelles longues, -ed /t/ /d/ /ɪd/, accent tonique. Phonèmes critiques DE : `r`, `ch` (ich-Laut/ach-Laut), umlauts, déclinaison à l'oreille | Diagnostic phonème par phonème via `prononciation-prof.sh` (voir ci-dessous) ; re-modèle ensuite le mot via TTS (`voix-prof.sh ... langue`) |
 | **Fluidité** | Hésitations, blancs longs, mots manquants à la transcription | Encourager, proposer une formule de remplissage (« well… », « let me think ») |
 
-**Limites de Whisper** : la transcription convertit en texte, donc la prononciation fine n'est pas directement visible. Utiliser des **proxys** : mots manquants (marmonnés ?), mots inattendus (substitution phonétique). Être honnête : *« Whisper a compris X, vérifie ta prononciation de Y. »*
+**Diagnostic prononciation fine — `prononciation-prof.sh`** :
+
+Whisper transcrit en texte et « corrige silencieusement » les erreurs phonétiques (« tree » prononcé pour « three » est souvent normalisé). Pour un diagnostic phonétique réel, utiliser le script dédié qui enregistre l'élève, extrait les phonèmes effectivement prononcés via **wav2vec2-phoneme** (modèle Meta local) et les compare aux phonèmes cibles via **espeak-ng** :
+
+```bash
+./scripts/prononciation-prof.sh "think" en      # 5s par défaut
+./scripts/prononciation-prof.sh "ich möchte" de 4
+```
+
+Sortie type :
+```
+Texte cible        : think
+Phonèmes cibles    : /θ ɪ ŋ k/
+Phonèmes prononcés : /s ɪ ŋ k/
+
+Écarts :
+  /θ/ → /s/   substitution
+```
+
+À utiliser **quand le prof suspecte un problème de prononciation précis** (mot mal compris, transcription Whisper ambiguë, phonème difficile en contexte). Pas en boucle systématique — c'est un outil de zoom, pas la transcription de défaut.
+
+Le LLM en mode prof interprète le diff (substitution `/θ/→/s/` est l'erreur classique L1 français → on explique la position de la langue, on re-modèle via TTS). Pré-requis : `brew install espeak-ng` + `pip3 install transformers torch soundfile phonemizer` au premier lancement (~2 Go au total, modèle wav2vec2 caché dans `~/.cache/huggingface/`).
+
+**3e permission Claude Code** : ce script déclenche un nouveau prompt « Always allow » au premier appel (en plus de `voix-prof.sh` et `record-and-transcribe.sh`). Si tu sais que la session inclura du diagnostic phonétique, prévenir l'élève dès le pré-flight pour que les 3 autorisations soient données d'un coup.
 
 **Priorité de correction** (ne pas tout corriger d'un coup) :
 1. Si le message ne passe pas → grammaire/vocab d'abord

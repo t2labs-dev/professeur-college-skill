@@ -53,6 +53,7 @@ Selon les fonctionnalités utilisées :
 |---|---|---|
 | Dictée avec backend OpenAI (`dictee-prof.sh`) | `ffmpeg` | `brew install ffmpeg` |
 | Enregistrement micro (`record-and-transcribe.sh`) | `ffmpeg` + `whisper` | `brew install ffmpeg` puis `pip3 install openai-whisper` |
+| Diagnostic phonétique fin (`prononciation-prof.sh`) | `ffmpeg` + `espeak-ng` + paquets Python ML | `brew install ffmpeg espeak-ng` puis `pip3 install transformers torch soundfile phonemizer` (~1.5 Go) ; modèle wav2vec2 ~1 Go téléchargé au premier appel |
 | Voix `say` (sans dictée OpenAI) | rien | déjà installé sur macOS |
 
 `ffmpeg` est nécessaire pour la dictée en backend OpenAI (concaténation des chunks audio avec silences réels) ainsi que pour l'enregistrement micro. Si Homebrew n'est pas installé : [brew.sh](https://brew.sh).
@@ -155,6 +156,36 @@ brew install ffmpeg
 pip3 install openai-whisper
 ```
 
+### Diagnostic de prononciation (langues étrangères)
+
+Whisper transcrit en texte et « corrige silencieusement » les erreurs phonétiques (« tree » prononcé pour « three » est souvent normalisé). Pour un diagnostic phonétique réel en anglais ou allemand, le skill utilise `prononciation-prof.sh` qui extrait les phonèmes effectivement prononcés via **wav2vec2-phoneme** (modèle Meta local) et les compare aux phonèmes cibles via **espeak-ng** :
+
+```bash
+./scripts/prononciation-prof.sh "think" en       # 5s par défaut
+./scripts/prononciation-prof.sh "I would have known" en 6
+./scripts/prononciation-prof.sh "ich möchte" de 4
+```
+
+Sortie type :
+```
+Texte cible        : think
+Phonèmes cibles    : /θ ɪ ŋ k/
+Phonèmes prononcés : /s ɪ ŋ k/
+
+Écarts :
+  /θ/ → /s/   substitution
+```
+
+Le prof interprète le diff (substitution `/θ/→/s/` est l'erreur classique L1 français → explication position de la langue, re-modélisation TTS).
+
+**Pré-requis** (~2 Go au total — installation manuelle recommandée) :
+```bash
+brew install ffmpeg espeak-ng
+pip3 install transformers torch soundfile phonemizer
+```
+
+Le modèle `facebook/wav2vec2-lv-60-espeak-cv-ft` (~1 Go) est téléchargé au premier appel et caché dans `~/.cache/huggingface/`. À utiliser **en zoom ponctuel** quand la prononciation d'un mot précis pose problème, pas en boucle systématique.
+
 ### Permissions Claude Code
 
 Quand le professeur utilise `say` ou le script d'enregistrement, Claude Code demande une confirmation avant d'exécuter la commande. Deux façons de gérer ça :
@@ -163,7 +194,7 @@ Quand le professeur utilise `say` ou le script d'enregistrement, Claude Code dem
 Claude Code affiche un prompt à chaque appel. Répondre **"Always allow"** au premier pour ne plus être interrompu ensuite.
 
 **Option 2 — Pré-autoriser dans les réglages Claude Code**
-Ajouter `say` et `scripts/record-and-transcribe.sh` à la liste des commandes autorisées dans les paramètres de Claude Code pour éviter tout prompt dès le départ.
+Ajouter `say`, `scripts/record-and-transcribe.sh` et `scripts/prononciation-prof.sh` à la liste des commandes autorisées dans les paramètres de Claude Code pour éviter tout prompt dès le départ.
 
 > Le skill ne peut pas pré-autoriser ces permissions lui-même — c'est le système de sécurité de Claude Code qui les gère, pas le skill.
 
