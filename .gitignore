@@ -12,3 +12,6 @@
 
 # Modèles ML téléchargés à la demande (whisper.cpp GGML, etc.)
 .models/
+
+# Notes de planification / études (locales, non publiées)
+plans/
