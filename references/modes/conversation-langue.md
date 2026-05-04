@@ -129,7 +129,7 @@ Phonèmes prononcés : /s ɪ ŋ k/
 
 À utiliser **quand le prof suspecte un problème de prononciation précis** (mot mal compris, transcription Whisper ambiguë, phonème difficile en contexte). Pas en boucle systématique — c'est un outil de zoom, pas la transcription de défaut.
 
-Le LLM en mode prof interprète le diff (substitution `/θ/→/s/` est l'erreur classique L1 français → on explique la position de la langue, on re-modèle via TTS). Pré-requis : `brew install espeak-ng` + `pip3 install transformers torch soundfile phonemizer` au premier lancement (~2 Go au total, modèle wav2vec2 caché dans `~/.cache/huggingface/`).
+Le LLM en mode prof interprète le diff (substitution `/θ/→/s/` est l'erreur classique L1 français → on explique la position de la langue, on re-modèle via TTS). Pré-requis système : `brew install ffmpeg espeak-ng`. Les paquets Python (`transformers`, `torch`, `soundfile`, `phonemizer`, ~1.5 Go) sont installés automatiquement dans `<skill>/.venv/` au premier lancement ; le modèle wav2vec2 (~1 Go) est caché dans `~/.cache/huggingface/`.
 
 **3e permission Claude Code** : ce script déclenche un nouveau prompt « Always allow » au premier appel (en plus de `voix-prof.sh` et `record-and-transcribe.sh`). Si tu sais que la session inclura du diagnostic phonétique, prévenir l'élève dès le pré-flight pour que les 3 autorisations soient données d'un coup.
 

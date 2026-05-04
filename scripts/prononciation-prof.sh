@@ -13,50 +13,43 @@
 #   ./scripts/prononciation-prof.sh "I would have known" en 6
 #   ./scripts/prononciation-prof.sh "ich möchte" de 4
 #
-# Pré-requis (premier lancement, ~2 Go) :
-#   brew install ffmpeg espeak-ng
-#   pip3 install transformers torch soundfile phonemizer
+# Pré-requis :
+#   - système : brew install ffmpeg espeak-ng
+#   - Python  : transformers, torch, soundfile, phonemizer (auto-installés
+#               dans <skill>/.venv au premier lancement, ~1.5 Go)
 #
 # Le modèle wav2vec2-lv-60-espeak-cv-ft (~1 Go) est téléchargé au premier
 # appel et caché dans ~/.cache/huggingface/.
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_venv.sh
+source "$SCRIPT_DIR/_venv.sh"
+
 TEXTE="${1:-}"
 LANG="${2:-en}"
 DUREE="${3:-5}"
 
 if [ -z "$TEXTE" ]; then
-  sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'
   exit 1
 fi
 
-# ── 1. Vérification des dépendances ───────────────────────────────────────────
-for cmd in ffmpeg espeak-ng python3; do
+# ── 1. Outils système ─────────────────────────────────────────────────────────
+for cmd in ffmpeg espeak-ng; do
   if ! command -v "$cmd" &>/dev/null; then
-    echo "[erreur] $cmd requis."
-    case "$cmd" in
-      ffmpeg|espeak-ng) echo "         brew install $cmd" ;;
-      python3)          echo "         brew install python3" ;;
-    esac
+    echo "[erreur] $cmd requis. brew install $cmd"
     exit 1
   fi
 done
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYHELPER="$SCRIPT_DIR/prononciation_check.py"
 [ -f "$PYHELPER" ] || { echo "[erreur] $PYHELPER manquant."; exit 1; }
 
-# ── 2. Vérifier les paquets Python (transformers, torch, soundfile, phonemizer)
-if ! python3 -c "import transformers, torch, soundfile, phonemizer" 2>/dev/null; then
-  echo "[info] Paquets Python manquants. Installation (~1.5 Go)..."
-  if command -v pip3 &>/dev/null; then
-    pip3 install --quiet transformers torch soundfile phonemizer
-  else
-    echo "[erreur] pip3 requis. brew install python3"
-    exit 1
-  fi
-fi
+# ── 2. Paquets Python dans le venv local ──────────────────────────────────────
+ensure_packages "import transformers, torch, soundfile, phonemizer" \
+  transformers torch soundfile phonemizer
 
 # ── 3. Enregistrement micro ───────────────────────────────────────────────────
 WAV="/tmp/prononciation_$$.wav"
@@ -83,4 +76,4 @@ fi
 echo "Analyse en cours (premier appel : téléchargement du modèle ~1 Go)..."
 echo ""
 
-python3 "$PYHELPER" "$WAV" "$TEXTE" "$LANG"
+"$VENV_PY" "$PYHELPER" "$WAV" "$TEXTE" "$LANG"

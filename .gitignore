@@ -6,3 +6,6 @@
 
 # Transcriptions audio (utilisées localement pour calibrer la dictée)
 *.srt
+
+# Virtualenv Python local au skill (créé à la volée par les scripts)
+.venv/

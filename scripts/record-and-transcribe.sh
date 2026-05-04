@@ -10,43 +10,29 @@
 #   ./scripts/record-and-transcribe.sh 45 en    # 45s, anglais
 #   ./scripts/record-and-transcribe.sh 30 de    # 30s, allemand
 #
-# Dépendances (installées automatiquement si Homebrew est disponible) :
-#   - ffmpeg   : brew install ffmpeg
-#   - whisper  : pip install openai-whisper
+# Dépendances (auto-installées dans <skill>/.venv au premier lancement) :
+#   - ffmpeg   : brew install ffmpeg   (système)
+#   - whisper  : openai-whisper        (Python, installé dans le venv)
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=_venv.sh
+source "$SCRIPT_DIR/_venv.sh"
 
 DURATION=${1:-30}
 LANG=${2:-fr}
 OUTPUT="/tmp/eleve_$(date +%s).wav"
 
-# ── 1. Vérifier / installer ffmpeg ────────────────────────────────────────────
+# ── 1. ffmpeg (système) ───────────────────────────────────────────────────────
 if ! command -v ffmpeg &>/dev/null; then
-  echo "[info] ffmpeg non trouvé."
-  if command -v brew &>/dev/null; then
-    echo "[info] Installation via Homebrew..."
-    brew install ffmpeg
-  else
-    echo "[erreur] ffmpeg est requis. Installe-le : brew install ffmpeg"
-    echo "         (si Homebrew n'est pas installé : https://brew.sh)"
-    exit 1
-  fi
+  echo "[erreur] ffmpeg requis. brew install ffmpeg"
+  exit 1
 fi
 
-# ── 2. Vérifier / installer whisper ───────────────────────────────────────────
-if ! command -v whisper &>/dev/null; then
-  echo "[info] Whisper non trouvé."
-  if command -v pip3 &>/dev/null; then
-    echo "[info] Installation via pip..."
-    pip3 install --quiet openai-whisper
-  elif command -v pip &>/dev/null; then
-    pip install --quiet openai-whisper
-  else
-    echo "[erreur] pip est requis pour installer Whisper."
-    echo "         Installe Python 3 : brew install python3"
-    exit 1
-  fi
-fi
+# ── 2. Whisper (venv local) ───────────────────────────────────────────────────
+ensure_packages "import whisper" openai-whisper
+WHISPER_BIN="$VENV_DIR/bin/whisper"
 
 # ── 3. Enregistrement ──────────────────────────────────────────────────────────
 echo ""
@@ -74,7 +60,7 @@ echo ""
 OUTDIR=$(dirname "$OUTPUT")
 BASENAME=$(basename "$OUTPUT" .wav)
 
-whisper "$OUTPUT" \
+"$WHISPER_BIN" "$OUTPUT" \
   --language "$LANG" \
   --model small \
   --output_format txt \
@@ -85,7 +71,7 @@ TRANSCRIPT="${OUTDIR}/${BASENAME}.txt"
 
 if [ ! -f "$TRANSCRIPT" ]; then
   echo "[erreur] Transcription échouée. Essaie avec le modèle base :"
-  echo "         whisper $OUTPUT --language $LANG --model base"
+  echo "         $WHISPER_BIN $OUTPUT --language $LANG --model base"
   exit 1
 fi
 

@@ -49,14 +49,18 @@ J'ai mon oral du brevet dans 10 jours, fais-moi une simulation
 
 Selon les fonctionnalités utilisées :
 
-| Fonctionnalité | Outil requis | Installation |
+| Fonctionnalité | Outil système | Paquets Python (venv local) |
 |---|---|---|
-| Dictée avec backend OpenAI (`dictee-prof.sh`) | `ffmpeg` | `brew install ffmpeg` |
-| Enregistrement micro (`record-and-transcribe.sh`) | `ffmpeg` + `whisper` | `brew install ffmpeg` puis `pip3 install openai-whisper` |
-| Diagnostic phonétique fin (`prononciation-prof.sh`) | `ffmpeg` + `espeak-ng` + paquets Python ML | `brew install ffmpeg espeak-ng` puis `pip3 install transformers torch soundfile phonemizer` (~1.5 Go) ; modèle wav2vec2 ~1 Go téléchargé au premier appel |
-| Voix `say` (sans dictée OpenAI) | rien | déjà installé sur macOS |
+| Dictée avec backend OpenAI (`dictee-prof.sh`) | `ffmpeg` | — |
+| Enregistrement micro (`record-and-transcribe.sh`) | `ffmpeg` | `openai-whisper` |
+| Diagnostic phonétique fin (`prononciation-prof.sh`) | `ffmpeg` + `espeak-ng` | `transformers`, `torch`, `soundfile`, `phonemizer` (~1.5 Go ; modèle wav2vec2 ~1 Go téléchargé au premier appel) |
+| Voix `say` (sans dictée OpenAI) | — (déjà sur macOS) | — |
 
-`ffmpeg` est nécessaire pour la dictée en backend OpenAI (concaténation des chunks audio avec silences réels) ainsi que pour l'enregistrement micro. Si Homebrew n'est pas installé : [brew.sh](https://brew.sh).
+```bash
+brew install ffmpeg espeak-ng    # outils système (Homebrew : https://brew.sh)
+```
+
+**Sandbox Python** : les paquets Python listés ci-dessus sont installés automatiquement dans un virtualenv local au skill (`<skill>/.venv/`) lors du premier lancement de chaque script. Aucune pollution de ton Python global, et contournement automatique de PEP 668 (« externally-managed-environment ») sur macOS récent. Le venv est gitignoré.
 
 ### Voix du professeur (TTS)
 
@@ -150,10 +154,9 @@ L'élève peut parler dans son micro et soumettre la transcription au professeur
 ./scripts/record-and-transcribe.sh 30 de   # 30 secondes, allemand
 ```
 
-Le script tente d'installer `ffmpeg` et `whisper` au premier lancement, mais l'installation manuelle est plus fiable :
+Au premier lancement, le script crée un venv local (`<skill>/.venv/`) et y installe `openai-whisper` automatiquement. `ffmpeg` reste à installer en système :
 ```bash
 brew install ffmpeg
-pip3 install openai-whisper
 ```
 
 ### Diagnostic de prononciation (langues étrangères)
@@ -178,13 +181,11 @@ Phonèmes prononcés : /s ɪ ŋ k/
 
 Le prof interprète le diff (substitution `/θ/→/s/` est l'erreur classique L1 français → explication position de la langue, re-modélisation TTS).
 
-**Pré-requis** (~2 Go au total — installation manuelle recommandée) :
+**Pré-requis** :
 ```bash
-brew install ffmpeg espeak-ng
-pip3 install transformers torch soundfile phonemizer
+brew install ffmpeg espeak-ng    # système
 ```
-
-Le modèle `facebook/wav2vec2-lv-60-espeak-cv-ft` (~1 Go) est téléchargé au premier appel et caché dans `~/.cache/huggingface/`. À utiliser **en zoom ponctuel** quand la prononciation d'un mot précis pose problème, pas en boucle systématique.
+Les paquets Python (`transformers`, `torch`, `soundfile`, `phonemizer`, ~1.5 Go) sont installés automatiquement dans le venv local au premier lancement. Le modèle `facebook/wav2vec2-lv-60-espeak-cv-ft` (~1 Go) est téléchargé au premier appel et caché dans `~/.cache/huggingface/`. À utiliser **en zoom ponctuel** quand la prononciation d'un mot précis pose problème, pas en boucle systématique.
 
 ### Permissions Claude Code
 
