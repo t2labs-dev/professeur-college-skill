@@ -49,18 +49,18 @@ J'ai mon oral du brevet dans 10 jours, fais-moi une simulation
 
 Selon les fonctionnalités utilisées :
 
-| Fonctionnalité | Outil système | Paquets Python (venv local) |
-|---|---|---|
-| Dictée avec backend OpenAI (`dictee-prof.sh`) | `ffmpeg` | — |
-| Enregistrement micro (`record-and-transcribe.sh`) | `ffmpeg` | `openai-whisper` |
-| Diagnostic phonétique fin (`prononciation-prof.sh`) | `ffmpeg` + `espeak-ng` | `transformers`, `torch`, `soundfile`, `phonemizer` (~1.5 Go ; modèle wav2vec2 ~1 Go téléchargé au premier appel) |
-| Voix `say` (sans dictée OpenAI) | — (déjà sur macOS) | — |
+| Fonctionnalité | Outil système | Paquets Python (venv local) | Modèle ML |
+|---|---|---|---|
+| Dictée avec backend OpenAI (`dictee-prof.sh`) | `ffmpeg` | — | — |
+| Transcription micro (`record-and-transcribe.sh`) | `ffmpeg` + `whisper-cpp` | — | GGML small ~466 Mo |
+| Diagnostic phonétique fin (`prononciation-prof.sh`) | `ffmpeg` + `espeak-ng` | `transformers`, `torch`, `soundfile`, `phonemizer` (~1.5 Go) | wav2vec2 ~1 Go |
+| Voix `say` (sans dictée OpenAI) | — (déjà sur macOS) | — | — |
 
 ```bash
-brew install ffmpeg espeak-ng    # outils système (Homebrew : https://brew.sh)
+brew install ffmpeg whisper-cpp espeak-ng    # outils système (Homebrew : https://brew.sh)
 ```
 
-**Sandbox Python** : les paquets Python listés ci-dessus sont installés automatiquement dans un virtualenv local au skill (`<skill>/.venv/`) lors du premier lancement de chaque script. Aucune pollution de ton Python global, et contournement automatique de PEP 668 (« externally-managed-environment ») sur macOS récent. Le venv est gitignoré.
+**Isolation des deps** : aucune installation globale de paquets Python. Les paquets pour `prononciation-prof.sh` sont installés dans un virtualenv local (`<skill>/.venv/`), et le modèle whisper.cpp dans `<skill>/.models/`. Les deux dossiers sont gitignorés et créés à la volée au premier lancement. Aucune pollution du Python système, contournement automatique de PEP 668 (« externally-managed-environment ») sur macOS récent.
 
 ### Voix du professeur (TTS)
 
@@ -154,9 +154,14 @@ L'élève peut parler dans son micro et soumettre la transcription au professeur
 ./scripts/record-and-transcribe.sh 30 de   # 30 secondes, allemand
 ```
 
-Au premier lancement, le script crée un venv local (`<skill>/.venv/`) et y installe `openai-whisper` automatiquement. `ffmpeg` reste à installer en système :
+Implémentation : **whisper.cpp** (port C++ natif, accélération Metal sur Apple Silicon, 2-5× plus rapide que `openai-whisper` Python). Pré-requis :
 ```bash
-brew install ffmpeg
+brew install ffmpeg whisper-cpp
+```
+Le modèle GGML (`small` par défaut, ~466 Mo) est téléchargé au premier lancement dans `<skill>/.models/`. Pour un autre modèle :
+```bash
+WHISPER_MODEL=tiny ./scripts/record-and-transcribe.sh 30 fr     # ~75 Mo, plus rapide, moins précis
+WHISPER_MODEL=medium ./scripts/record-and-transcribe.sh 30 fr   # ~1.5 Go, plus précis
 ```
 
 ### Diagnostic de prononciation (langues étrangères)
@@ -198,6 +203,24 @@ Claude Code affiche un prompt à chaque appel. Répondre **"Always allow"** au p
 Ajouter `say`, `scripts/record-and-transcribe.sh` et `scripts/prononciation-prof.sh` à la liste des commandes autorisées dans les paramètres de Claude Code pour éviter tout prompt dès le départ.
 
 > Le skill ne peut pas pré-autoriser ces permissions lui-même — c'est le système de sécurité de Claude Code qui les gère, pas le skill.
+
+## Migration depuis une version antérieure
+
+Si une version précédente du skill avait installé `openai-whisper` dans ton Python global (via `pip3 install openai-whisper`), ces paquets restent en place mais **ne sont plus utilisés** par la version actuelle :
+- `record-and-transcribe.sh` utilise désormais le binaire C++ `whisper-cpp` (à installer via Homebrew).
+- `prononciation-prof.sh` installe ses paquets Python (`transformers`, `torch`, …) dans un venv local au skill (`<skill>/.venv/`), pas en global.
+
+Aucun conflit, mais ~700 Mo de paquets orphelins sur ton disque. Pour récupérer l'espace :
+
+```bash
+pip3 uninstall -y openai-whisper torch
+# Sur macOS récent (PEP 668), si pip refuse : pip3 uninstall --break-system-packages -y openai-whisper torch
+```
+
+Si tu veux aussi nettoyer un éventuel venv local créé par une version intermédiaire de transition :
+```bash
+rm -rf <chemin-vers-le-skill>/.venv
+```
 
 ## Licence
 

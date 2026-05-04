@@ -9,3 +9,6 @@
 
 # Virtualenv Python local au skill (créé à la volée par les scripts)
 .venv/
+
+# Modèles ML téléchargés à la demande (whisper.cpp GGML, etc.)
+.models/
