@@ -118,18 +118,17 @@ La voix du prof n'est **pas** un gadget à activer en permanence. Elle s'utilise
 
 1. **Capter l'attention de l'élève** — courte phrase d'accroche pour ramener la concentration. Style `important` recommandé.
    - Ex : `voix-prof.sh francais "Hé, regarde bien ce qui suit." important`
-2. **Dicter un texte en français** — deux cas distincts :
+2. **Dicter un texte en français** — choisis la source selon le besoin (détails complets dans `references/modes/dictee.md`) :
    - **Lecture simple** d'un poème ou d'un court extrait à mémoriser → `voix-prof.sh francais "Les sanglots longs des violons de l'automne..." langue`
-   - **Vraie dictée** (exercice d'orthographe noté) → utilise le script dédié `dictee-prof.sh` qui reproduit le workflow officiel du brevet :
-     1. **Phase 1** : lecture intégrale au tempo normal (contextualisation, sans pause).
-     2. **Phase 2** : pour chaque phrase, dictée par **groupes de souffle** (~5-10 mots, ponctuation parlée à la fin : « virgule », « point »). Chaque chunk est lu **deux fois** avec une pause d'écriture entre les deux (~1.2 s/mot, 4-12 s). Après tous les chunks d'une phrase, **récap** de la phrase entière en lecture continue.
-     3. **Phase 3** : relecture finale en chunks continus (avec ponctuation parlée).
+   - **Vraie dictée — préparation brevet (annales DNB)** → dictées audio humaines de **reviser-brevet.fr** (12 dictées MP3 directes vérifiées : Flaubert, Maupassant, Pagnol, Colette, Baudelaire, etc.). Workflow : `curl` le MP3 + `afplay`.
+   - **Vraie dictée — par thème ou niveau précis** (6e→3e, par difficulté) → **dictaly.com** (~1100 dictées, compte gratuit pour téléchargement) ou **ladictee.fr** (~302 dictées par niveau). Workflow : `open` la page, l'élève écoute en streaming.
+   - **Vraie dictée — texte sur mesure** (poème du programme, extrait du cours, contrôle ciblé sur une règle) → `dictee-prof.sh` (TTS local, workflow brevet reproduit) :
      ```bash
      ./scripts/dictee-prof.sh francais "Le chat dort sur le tapis. Il rêve de souris."
      ```
-     Pour forcer une pause d'écriture fixe : 3e argument en secondes.
+     Phases : lecture intégrale → groupes de souffle ×2 avec ponctuation parlée → récap par phrase → relecture finale. Voix continue (un appel par phase côté `say`, MP3 concaténés via `ffmpeg` côté OpenAI). Backend forçable via `PROF_BACKEND=say|openai|text`.
 
-     Voix continue : un seul appel par phase côté `say` (avec `[[slnc N]]`), audio concaténé via `ffmpeg` côté OpenAI (un MP3 par chunk unique + un par récap, silences réels insérés). Pas de re-génération de chunk.
+   Dans tous les cas, l'élève écrit sur papier, photographie sa copie et la colle dans la conversation ; le prof corrige en comparant au corrigé (HTML, PDF téléchargé, ou texte d'origine pour la dictée TTS).
 3. **Montrer la bonne prononciation en langue étrangère** — modèle phonétique en anglais ou allemand. **Toujours** style `langue`.
    - Ex : `voix-prof.sh anglais "I would have known." langue`
 
