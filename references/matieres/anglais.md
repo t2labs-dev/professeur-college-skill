@@ -27,6 +27,8 @@ Cinq activités langagières évaluées :
 4. **Expression orale en interaction** (EOI)
 5. **Expression écrite** (EE)
 
+> Pour travailler EOC/EOI, propose à l'élève le **mode conversation parlée** (drill questions, scénarios A1/A2, lecture à voix haute, conversation libre) — boucle TTS prof ↔ STT élève avec correction prononciation + grammaire à chaque tour. Voir `references/modes/conversation-langue.md`.
+
 ## Programme officiel par niveau
 
 ### 6e — fin du cycle 3, LV1 niveau A1

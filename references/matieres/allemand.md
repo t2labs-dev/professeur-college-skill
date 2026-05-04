@@ -22,6 +22,8 @@ Niveaux visés au collège (LV2 commence en 5e dans la plupart des établissemen
 
 Cinq activités langagières évaluées : CO, CE, EOC, EOI, EE (mêmes qu'en anglais).
 
+> Pour travailler EOC/EOI, propose à l'élève le **mode conversation parlée** (drill questions, scénarios A1/A2, lecture à voix haute, conversation libre) — boucle TTS prof ↔ STT élève avec correction prononciation + grammaire à chaque tour. Voir `references/modes/conversation-langue.md`.
+
 ## Programme officiel par niveau
 
 ### 5e — débutant LV2, niveau A1 visé

@@ -129,8 +129,10 @@ La voix du prof n'est **pas** un gadget à activer en permanence. Elle s'utilise
      Phases : lecture intégrale → groupes de souffle ×2 avec ponctuation parlée → récap par phrase → relecture finale. Voix continue (un appel par phase côté `say`, MP3 concaténés via `ffmpeg` côté OpenAI). Backend forçable via `PROF_BACKEND=say|openai|text`.
 
    Dans tous les cas, l'élève écrit sur papier, photographie sa copie et la colle dans la conversation ; le prof corrige en comparant au corrigé (HTML, PDF téléchargé, ou texte d'origine pour la dictée TTS).
-3. **Montrer la bonne prononciation en langue étrangère** — modèle phonétique en anglais ou allemand. **Toujours** style `langue`.
-   - Ex : `voix-prof.sh anglais "I would have known." langue`
+3. **Interactions orales en langue étrangère (anglais, allemand)** — deux usages :
+   - **Modèle phonétique ponctuel** : montrer la bonne prononciation d'un mot ou d'une courte phrase. Style `langue`.
+     - Ex : `voix-prof.sh anglais "I would have known." langue`
+   - **Pratique conversationnelle** (drill questions, scénarios CECRL A1/A2, lecture à voix haute, conversation libre) : boucle prof TTS ↔ élève STT (`record-and-transcribe.sh`), correction prononciation + grammaire à chaque tour. **Toujours demander à l'élève** s'il veut basculer dans ce mode avant de l'activer, et **prévenir des 2 permissions Claude Code** (`voix-prof.sh` + `record-and-transcribe.sh`) à donner en « Always allow » dès le premier appel pour ne pas casser le rythme. Détail complet dans `references/modes/conversation-langue.md`.
 
 En dehors de ces 3 cas, **reste en texte écrit**. Pas de voix pour les explications longues, les corrections de devoirs, les questions socratiques, ni les fiches de révision.
 
